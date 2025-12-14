@@ -1,0 +1,74 @@
+/* src/App.css */
+
+:root {
+  /* Sage Green Palette */
+  --color-primary: #1b1b1a; /* Dark Green for headings/buttons */
+  --color-secondary: #4e743da1; /* Sage Green for accents */
+  --color-background: #69c269af; /* Very light sage background */
+  --color-text: #201e1e;
+  --color-border: #1f1e1e;
+  --color-shadow: rgba(0, 0, 0, 0.856);
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 20px;
+}
+
+h2 {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+/* Basic Button Styling */
+button {
+  background-color: var(--color-primary);
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+button:hover:not(:disabled) {
+  background-color: #0c0c0b;
+}
+
+button:disabled {
+  background-color: #999999;
+  cursor: not-allowed;
+}
+
+/* Input Styling */
+input[type="text"], 
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus, 
+input[type="password"]:focus {
+  border-color: var(--color-primary);
+  outline: none;
+}
