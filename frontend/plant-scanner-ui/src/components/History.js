@@ -1,81 +1,56 @@
-// src/components/History.js
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+// D:\plant_health_scanner_project\frontend\src\components\History.js
+import React from 'react';
+import './ComponentStyles.css';
 
-const API_URL = 'http://127.0.0.1:8000/api/user/history/'; 
-
-function History({ userId, onNewScan, handleLogout,handleViewAdmin }) {
-    const [history, setHistory] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                // Fetch history for the logged-in user ID
-                const response = await axios.get(API_URL, {
-                    params: { user_id: userId } 
-                });
-                setHistory(response.data.history);
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to fetch scan history.');
-                setLoading(false);
-            }
-        };
-
-        fetchHistory();
-    }, [userId]); // Dependency array runs effect when userId changes
-
-    const renderHistoryTable = () => {
-        if (loading) return <p>Loading history...</p>;
-        if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-        if (history.length === 0) return <p>No scans found yet. Time to check your plants!</p>;
-
-        return (
-            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
-                <thead>
-                    <tr style={{ backgroundColor: '#f2f2f2' }}>
-                        <th style={{ border: '1px solid #ddd', padding: '8px' }}>Date</th>
-                        <th style={{ border: '1px solid #ddd', padding: '8px' }}>Status</th>
-                        <th style={{ border: '1px solid #ddd', padding: '8px' }}>Issue Identified</th>
-                        <th style={{ border: '1px solid #ddd', padding: '8px' }}>Confidence (%)</th>
-                        <th style={{ border: '1px solid #ddd', padding: '8px' }}>Recommendation</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {history.map((scan) => (
-                        <tr key={scan.id}>
-                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{scan.date}</td>
-                            <td style={{ border: '1px solid #ddd', padding: '8px', color: scan.status === 'Healthy' ? 'green' : 'red' }}>{scan.status}</td>
-                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{scan.type}</td>
-                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{parseFloat(scan.confidence).toFixed(2)}</td>
-                            <td style={{ border: '1px solid #ddd', padding: '8px' }}>{scan.recommendation_summary.substring(0, 50)}...</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        );
-    };
-
+// Adding = [] means: "if historyData is missing, treat it as an empty list"
+function History({ historyData = [], onBack }) {
     return (
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-            <div style={{ float: 'right' }}>
-                <button onClick={onNewScan} style={{ marginRight: '10px' }}>New Scan</button>
-                <button onClick={handleViewAdmin} style={{ marginRight: '10px' }}>Admin</button>
-                <button onClick={handleLogout}>Logout</button>
+        <div className="glass-card" style={{ maxWidth: '1000px', width: '90%' }}>
+            <div className="spatial-header" style={{ textAlign: 'left', marginBottom: '30px' }}>
+                <h2 style={{ fontSize: '2.5rem', fontWeight: '800' }}>
+                    Scan <span style={{ color: 'var(--accent-mint)' }}>History.</span>
+                </h2>
+                <p style={{ opacity: 0.6 }}>Review your past plant health diagnostics.</p>
             </div>
-            <h2>Scan History & Health Tracking</h2>
-            <p>View all past analyses and track plant health over time.</p>
-            
-            {renderHistoryTable()}
-            
-            {/* Placeholder for Graphs and Tracking [cite: 51-54, 134] */}
-            <div style={{ marginTop: '50px', borderTop: '1px solid #ccc', paddingTop: '20px' }}>
-                <h3>Health Trends (Placeholder for Graphs)</h3>
-                <p>Graphs (Timeline, Comparison of health, Frequency of diseases) would go here to provide visual tracking [cite: 52-54].</p>
-                
+
+            <div className="history-container" style={{ overflowX: 'auto' }}>
+                <table className="spatial-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Plant Type</th>
+                            <th>Status</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {historyData.length > 0 ? (
+                            historyData.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{new Date(item.date).toLocaleDateString()}</td>
+                                    <td><strong>{item.type}</strong></td>
+                                    <td>
+                                        <span className={`status-badge ${item.status.toLowerCase()}`}>
+                                            {item.status.toUpperCase()}
+                                        </span>
+                                    </td>
+                                    <td>{item.confidence}%</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="4" style={{ textAlign: 'center', padding: '40px', opacity: 0.5 }}>
+                                    No scans found in your history.
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
             </div>
+
+            <button onClick={onBack} className="secondary-cta" style={{ marginTop: '30px', width: '200px' }}>
+                BACK TO SCANNER
+            </button>
         </div>
     );
 }

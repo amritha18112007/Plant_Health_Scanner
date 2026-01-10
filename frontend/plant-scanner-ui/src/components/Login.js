@@ -1,9 +1,8 @@
-// src/components/Login.js (Updated for design)
+// src/components/Login.js
 import React, { useState } from 'react';
 import axios from 'axios';
-import './ComponentStyles.css'; // We'll create this for component-specific styles
+import './ComponentStyles.css'; 
 
-// Base URL for your Django Authentication APIs
 const API_BASE_URL = 'http://127.0.0.1:8000/api/auth/'; 
 
 function Login({ handleLoginSuccess }) {
@@ -25,23 +24,26 @@ function Login({ handleLoginSuccess }) {
       });
 
       if (isRegistering) {
-        setMessage('Registration successful! Please log in.');
+        setMessage('Account created! You can now login.');
         setIsRegistering(false);
-        setUsername('');
-        setPassword('');
       } else {
         handleLoginSuccess(response.data.user_id); 
       }
     } catch (error) {
-      setMessage(`Error: ${error.response?.data?.error || 'Could not connect to server or Invalid credentials.'}`);
+      setMessage(`Error: ${error.response?.data?.error || 'Authentication failed.'}`);
     }
   };
 
   return (
-    <div className="form-container"> {/* Use new class */}
-      <h2>{isRegistering ? 'Create Account' : 'Welcome Back'}</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="glass-card login-center">
+      <div className="spatial-header">
+        <h1 className="login-title">Welcome <span className="mint-text">Back.</span></h1>
+        <p className="login-subtitle">Securely access your plant health dashboard.</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="login-form">
         <input
+          className="glass-input"
           type="text"
           placeholder="Username"
           value={username}
@@ -49,26 +51,24 @@ function Login({ handleLoginSuccess }) {
           required
         />
         <input
+          className="glass-input"
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">
-          {isRegistering ? 'Register' : 'Login'}
+        <button type="submit" className="spatial-button">
+          {isRegistering ? 'CREATE ACCOUNT' : 'LOG IN'}
         </button>
       </form>
-      <p className="switch-link">
-        {isRegistering ? 'Already have an account? ' : "Don't have an account? "}
-        <span onClick={() => {
-            setIsRegistering(!isRegistering);
-            setMessage('');
-        }} className="link-button">
-          {isRegistering ? 'Login' : 'Register'}
-        </span>
-      </p>
-      {message && <p className={message.startsWith('Error') ? 'error-message' : 'success-message'}>{message}</p>}
+
+      <div className="auth-footer">
+        <p onClick={() => setIsRegistering(!isRegistering)} className="toggle-auth">
+          {isRegistering ? 'Already have an account? Login' : "Don't have an account? Register"}
+        </p>
+        {message && <p className="status-msg">{message}</p>}
+      </div>
     </div>
   );
 }
