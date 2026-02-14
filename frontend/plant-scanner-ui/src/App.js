@@ -1,115 +1,139 @@
-// D:\plant_health_scanner_project\frontend\plant-scanner-ui\src\App.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Login from './components/Login';
-import ResultPage from './components/ResultPage';
+import { AnimatePresence, motion } from 'framer-motion';
+
+import AboutPage from './components/AboutPage'; 
+import HomePage from './components/HomePage';
+import AdminDashboard from './components/AdminDashboard';
 import History from './components/History';
-import './App.css';
+import ResultPage from './components/ResultPage';
+import Sidebar from './components/Sidebar';
+import UserProfile from './components/UserProfile';
+import AccountDetails from './components/AccountDetails';
+import AboutApp from './components/AboutApp';
+import Downloads from './components/Downloads';
+
+import './App.css'; 
 
 function App() {
-    // --- 1. STATE MANAGEMENT ---
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userId, setUserId] = useState(null);
-    const [currentPage, setCurrentPage] = useState('login'); 
+    const [user, setUser] = useState(null); 
+    const [currentPage, setCurrentPage] = useState('landing'); 
+    const [dashboardPage, setDashboardPage] = useState('main'); 
+    const [stats, setStats] = useState({ total_scans: 0, total_users: 0, user_scans: 0, healthy_ratio: "0%" });
     const [scanResult, setScanResult] = useState(null);
-    const [history, setHistory] = useState([]); // Initialized as empty array to prevent crashes
+    const [history, setHistory] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // --- 2. BACKEND INTEGRATION ---
-    
-    // Fetch History from Django
-    const fetchHistory = async () => {
-        try {
-            const response = await axios.get(`http://127.0.0.1:8000/api/history/?user_id=${userId}`);
-            setHistory(response.data);
-            setCurrentPage('history');
-        } catch (error) {
-            console.error("Error fetching history:", error);
-            alert("Could not load history. Is the backend running?");
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            setUser({ username: localStorage.getItem('username') });
+            setCurrentPage('home'); 
+            fetchStats();
         }
+    }, []);
+
+    const fetchStats = async () => {
+        try {
+            const res = await axios.get('http://127.0.0.1:8000/api/admin/metrics/');
+            setStats(res.data); 
+        } catch (e) { console.error("Stats failed"); }
     };
 
-    // Handle Image Upload to Django
-    const handleScanUpload = async (e) => {
-        const imageFile = e.target.files[0];
-        if (!imageFile) return;
-
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        formData.append('user_id', userId);
-
+    const fetchHistory = async () => {
+        setIsLoading(true);
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/upload/', formData);
-            setScanResult(response.data);
-            setCurrentPage('result');
-        } catch (error) {
-            console.error("Scan error:", error);
-            alert("Scan failed. Check your Django terminal for errors.");
+            const res = await axios.get(`http://127.0.0.1:8000/api/user/history/`);
+            setHistory(res.data);
+            setDashboardPage('history');
+            setCurrentPage('dashboard'); // Walk into the "Dashboard Stage"
+        } catch (e) { alert("Error loading history"); } 
+        finally { setIsLoading(false); setIsSidebarOpen(false); }
+    };
+
+    // THE MASTER NAVIGATOR: This fixes the "no use" issue
+    const navigateTo = (target) => {
+        setIsSidebarOpen(false);
+        if (target === 'home') {
+            setCurrentPage('home');
+        } else if (target === 'history') {
+            fetchHistory();
+        } else {
+            setDashboardPage(target);
+            setCurrentPage('dashboard'); // Force stage switch
         }
     };
 
     const handleLogout = () => {
-        setIsLoggedIn(false);
-        setUserId(null);
-        setCurrentPage('login');
+        localStorage.clear();
+        setUser(null);
+        setCurrentPage('landing');
     };
 
-    // --- 3. JSX RENDER LOGIC ---
+    // ROUTER COMPONENT: Ensures the right page is rendered
+    const renderActivePage = () => {
+        switch(dashboardPage) {
+            case 'history': return <History historyData={history} onBack={() => setDashboardPage('main')} onRefresh={fetchHistory} />;
+            case 'profile': return <UserProfile username={user?.username} userScans={stats.user_scans} onBack={() => setDashboardPage('main')} />;
+            case 'account': return <AccountDetails onBack={() => setDashboardPage('main')} />;
+            case 'about': return <AboutApp onBack={() => setDashboardPage('main')} />;
+            case 'downloads': return <Downloads historyData={history} onBack={() => setDashboardPage('main')} />;
+            case 'result': return <ResultPage result={scanResult} onNewScan={() => setDashboardPage('main')} />;
+            default: return (
+                <AdminDashboard 
+                    username={user?.username} 
+                    stats={stats} 
+                    onOpenMenu={() => setIsSidebarOpen(true)}
+                    onBack={() => setCurrentPage('home')}
+                    onStartScan={() => document.getElementById('file-input').click()} 
+                    onLogout={handleLogout}
+                />
+            );
+        }
+    };
+
     return (
         <div className="App">
-            {/* 1. Login View */}
-            {!isLoggedIn && (
-                <Login onLogin={(id) => {
-                    setUserId(id);
-                    setIsLoggedIn(true);
-                    setCurrentPage('scan');
-                }} />
-            )}
+            {isLoading && <div className="loading-overlay"><div className="spinner"></div><p>Syncing Sankarnagar Data...</p></div>}
 
-            {/* 2. Main Scan View (Internal UI to replace missing Scanner component) */}
-            {isLoggedIn && currentPage === 'scan' && (
-                <div className="glass-card">
-                    <div className="spatial-header">
-                        <h2>Scan <span style={{ color: 'var(--accent-mint)' }}>Leaf.</span></h2>
-                        <p>Select a plant leaf for 10-species identification.</p>
-                    </div>
-                    
-                    <div className="upload-section" style={{ margin: '40px 0' }}>
-                        <input 
-                            type="file" 
-                            id="file-upload"
-                            accept="image/*" 
-                            onChange={handleScanUpload} 
-                            style={{ display: 'none' }}
-                        />
-                        <label htmlFor="file-upload" className="primary-cta" style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
-                            CHOOSE PHOTO
-                        </label>
-                    </div>
-                    
-                    <button onClick={fetchHistory} className="secondary-cta" style={{ width: '100%', marginBottom: '10px' }}>
-                        VIEW SCAN HISTORY
-                    </button>
-                    <button onClick={handleLogout} style={{ background: 'none', border: 'none', color: 'white', opacity: 0.5, cursor: 'pointer', width: '100%' }}>
-                        Logout
-                    </button>
-                </div>
-            )}
-
-            {/* 3. Result View */}
-            {isLoggedIn && currentPage === 'result' && (
-                <ResultPage 
-                    result={scanResult} 
-                    onNewScan={() => setCurrentPage('scan')} 
+            {user && (
+                <Sidebar 
+                    isOpen={isSidebarOpen} 
+                    onClose={() => setIsSidebarOpen(false)}
+                    username={user.username}
+                    onLogout={handleLogout}
+                    onNavigate={navigateTo} 
                 />
             )}
 
-            {/* 4. History View */}
-            {isLoggedIn && currentPage === 'history' && (
-                <History 
-                    historyData={history} 
-                    onBack={() => setCurrentPage('scan')} 
-                />
-            )}
+            <AnimatePresence mode="wait">
+                {currentPage === 'landing' && <AboutPage key="landing" onAuthSuccess={() => setCurrentPage('home')} />}
+                
+                {currentPage === 'home' && (
+                    <HomePage 
+                        key="home"
+                        username={user?.username}
+                        onOpenMenu={() => setIsSidebarOpen(true)}
+                        onStartScan={() => navigateTo('main')} 
+                        onViewHistory={fetchHistory}
+                    />
+                )}
+
+                {currentPage === 'dashboard' && (
+                    <motion.div 
+                        key="dashboard-stage"
+                        initial={{ opacity: 0 }} 
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="dashboard-stage-container"
+                    >
+                        {renderActivePage()}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <input type="file" id="file-input" style={{ display: 'none' }} accept="image/*" />
         </div>
     );
 }

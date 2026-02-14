@@ -13,4 +13,6 @@ urlpatterns = [
 
     # Admin & Monitoring APIs
     path('admin/metrics/', views.get_admin_metrics, name='admin_metrics'),
+    path('login/', views.login_user, name='login'),       # Final URL: /api/login/
+    path('register/', views.register_user, name='register'), # Final URL: /api/register/
 ]
