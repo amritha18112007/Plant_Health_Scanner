@@ -1,0 +1,129 @@
+
+
+
+/* src/components/ComponentStyles.css */
+
+/* --- Card & Container Styles --- */
+
+.page-container {
+    width: 100%;
+    max-width: 900px;
+    padding: 20px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.card {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px var(--color-shadow);
+    margin: 30px auto;
+}
+
+/* Login/Form Specific */
+.form-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: white;
+    padding: 40px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px var(--color-shadow);
+    text-align: center;
+}
+
+.switch-link {
+    margin-top: 20px;
+    font-size: 0.9em;
+}
+
+.link-button {
+    color: var(--color-primary);
+    cursor: pointer;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* --- Navigation & Messages --- */
+
+.top-nav {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.nav-button {
+    background-color: transparent;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
+    margin-left: 10px;
+    padding: 8px 12px;
+}
+
+.nav-button:hover {
+    background-color: var(--color-secondary);
+    color: white;
+}
+
+.success-message {
+    color: var(--color-primary);
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.error-message {
+    color: #dc3545;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+/* --- Result Page Specific --- */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    color: white;
+    display: inline-block;
+}
+
+.healthy-badge {
+    background-color: #28a745;
+}
+
+.unhealthy-badge {
+    background-color: #dc3545;
+}
+
+.recommendation-box {
+    padding: 15px;
+    border-left: 5px solid var(--color-primary);
+    background-color: #f0f8f0; /* Lightest sage */
+    text-align: left;
+    margin-top: 20px;
+}
+/* src/components/ComponentStyles.css (Add these new styles) */
+
+.analysis-summary {
+    display: flex;
+    justify-content: space-around;
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.summary-item {
+    padding: 0 10px;
+    font-size: 1.1em;
+}
+
+/* Redefine primary button for clarity */
+.primary-button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
