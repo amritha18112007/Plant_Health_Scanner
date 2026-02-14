@@ -1,6 +1,15 @@
-*.h5
-*.pth
-db.sqlite3
-venv/
-node_modules/
-__pycache__/
+# Python Virtual Environment
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+
+# Node Modules (Frontend)
+frontend/plant-scanner-ui/node_modules/
+frontend/plant-scanner-ui/.pnp
+frontend/plant-scanner-ui/.pnp.js
+
+# Environment Variables & OS files
+.env
+.DS_Store
+Thumbs.db
+build/
